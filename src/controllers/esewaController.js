@@ -97,6 +97,7 @@ exports.initializeEsewaPayment = async (req, res) => {
       user: userId,
       location: locationId,
       status: { $in: ["pending", "completed"] },
+      isAvailable: false,
       "bookingDuration.endDate": { $gt: now }, // nested path fix here
     });
 

@@ -106,10 +106,56 @@ const getMyRooms = async (req, res) => {
   }
 };
 
+const searchRooms = async (req, res) => {
+  try {
+    const { q, page = 1, limit = 10 } = req.query;
+
+    const filter = { isAvailable: true };
+
+    if (q) {
+      const regex = new RegExp(q.trim(), 'i');
+      filter.$or = [
+        { city: regex },
+        { district: regex },
+        { ward: regex },
+        { description: regex },
+      ];
+    }
+
+    const pageNumber = parseInt(page, 10) || 1;
+    const limitNumber = parseInt(limit, 10) || 10;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const rooms = await Room.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNumber);
+
+    const totalRooms = await Room.countDocuments(filter);
+
+    res.status(200).json({
+      totalRooms,
+      currentPage: pageNumber,
+      totalPages: Math.ceil(totalRooms / limitNumber),
+      rooms,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
+
+
+
+
 
 // Export all controllers
 module.exports = {
   postRoom,
   getRooms,
   getMyRooms,
+  searchRooms,
 };

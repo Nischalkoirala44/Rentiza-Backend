@@ -43,6 +43,7 @@ exports.bookCashPayment = async (req, res) => {
       user: userId,
       location: locationId,
       status: { $in: ["pending", "completed"] },
+      isAvailable: false,
       "bookingDuration.endDate": { $gt: now },
     });
 
