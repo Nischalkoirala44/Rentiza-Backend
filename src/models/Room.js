@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const RoomSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
+    phone: { type: String, required: true },
     lat: { type: Number, required: true },
     lon: { type: Number, required: true },
     city: { type: String },

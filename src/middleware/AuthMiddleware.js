@@ -13,7 +13,6 @@ const authenticateUser = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    console.error('Auth middleware error:', err);
     return res.status(403).json({ message: "Invalid or expired token." });
   }
 };

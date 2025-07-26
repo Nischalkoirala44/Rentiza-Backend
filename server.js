@@ -2,11 +2,11 @@ const express = require('express');
 const connectDB = require('./src/config/db');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const userRoutes = require('./src/routes/UserRoutes');
-const authRoutes = require('./src/routes/AuthRoutes');
-const roomRoutes = require('./src/routes/RoomRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const roomRoutes = require('./src/routes/roomRoutes')
 const eSewaRoutes = require('./src/routes/eSewaRoutes');
-const bookingRoutes = require('./src/routes/BookingRoutes');
+const bookingRoutes = require('./src/routes/bookingRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;

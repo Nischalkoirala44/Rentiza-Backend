@@ -71,7 +71,7 @@ const logout = async (req, res) => {
 };
 
 async function sendResetEmail(email, resetToken) {
-  const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+  const resetUrl = `http://localhost:3000/pages/reset-password?token=${resetToken}`;
 
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -105,9 +105,8 @@ const forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      // Security: don't reveal if email exists or not
       return res.status(200).json({
-        message: "If an account with that email exists, a password reset link has been sent.",
+        message: "User with this email Doesn't exist.",
       });
     }
 
@@ -115,14 +114,14 @@ const forgotPassword = async (req, res) => {
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
     user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiry
+    user.resetPasswordExpires = Date.now() + 3600000;
 
     await user.save();
 
     await sendResetEmail(user.email, resetToken);
 
     res.status(200).json({
-      message: "If an account with that email exists, a password reset link has been sent.",
+      message: "Reset link has been sent to your email.",
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });

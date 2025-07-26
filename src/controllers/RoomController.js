@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 const Room = require('../models/Room');
+const PurchasedItem = require('../models/PurchasedItem');
 
-// POST a new room by landlord
 const postRoom = async (req, res) => {
-  console.log('postRoom req.user:', req.user);
   try {
     const {
       name,
+      phone,
       lat,
       lon,
       city,
@@ -17,7 +17,7 @@ const postRoom = async (req, res) => {
       esewaMerchantId,
     } = req.body;
 
-    if (!name || lat == null || lon == null || !esewaMerchantId) {
+    if (!name || lat == null || lon == null || !esewaMerchantId || !phone == null) {
       return res.status(400).json({
         message: 'Name, coordinates, and eSewa merchant ID are required.',
       });
@@ -27,6 +27,7 @@ const postRoom = async (req, res) => {
 
     const newRoom = new Room({
       name,
+      phone,
       lat,
       lon,
       city,
@@ -72,16 +73,39 @@ const getRooms = async (req, res) => {
 // GET rooms posted by logged-in user
 const getMyRooms = async (req, res) => {
   try {
-    const ownerId = mongoose.Types.ObjectId(req.user.userID);
+    const ownerId = new mongoose.Types.ObjectId(req.user.userID);
+
+    // Fetch all rooms posted by this owner
     const myRooms = await Room.find({ owner: ownerId }).sort({ createdAt: -1 });
-    res.status(200).json(myRooms);
+
+    const roomsWithBookingDetails = await Promise.all(
+      myRooms.map(async (room) => {
+        const purchasedItem = await PurchasedItem.findOne({
+          location: room._id,
+          status: "completed",
+        }).select("bookingDuration tenantName")
+          .sort({ "bookingDuration.startDate": -1 });
+
+        return {
+          ...room.toObject(),
+          bookingDuration: purchasedItem ? purchasedItem.bookingDuration : null,
+          tenantName: purchasedItem ? purchasedItem.tenantName : null,
+        };
+        
+      })
+    
+    );
+
+    res.status(200).json(roomsWithBookingDetails);
   } catch (err) {
+    console.error(err);
     res.status(500).json({
-      message: 'Server error',
+      message: "Server error",
       error: err.message,
     });
   }
 };
+
 
 // Export all controllers
 module.exports = {
